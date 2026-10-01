@@ -566,7 +566,15 @@
       user-select: none;
     }
     .work-slideshow::before {
-      display: none;
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3.5rem;
+      background: linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 100%);
+      z-index: 2;
+      pointer-events: none;
     }
     .work-slide {
       position: absolute;
@@ -587,12 +595,12 @@
     /* slide dots */
     .work-dots {
       position: absolute;
-      bottom: 1.2rem;
+      bottom: 0.85rem;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
       gap: 0.45rem;
-      z-index: 3;
+      z-index: 4;
     }
     .work-dot {
       width: 7px; height: 7px;
@@ -2052,25 +2060,42 @@
     var autoTimer;
     var touchStartX = 0, touchStartY = 0, dragging = false;
 
-    // Clear and rebuild dots to match slide count
-    dotsContainer.innerHTML = '';
-    slides.forEach(function(_, i) {
-      var dot = document.createElement('button');
-      dot.className = 'work-dot' + (i === 0 ? ' active' : '');
-      dot.setAttribute('aria-label', 'Slide ' + (i + 1));
-      dot.addEventListener('click', function() { goTo(i); resetTimer(); });
-      dotsContainer.appendChild(dot);
-    });
+    // Only show dots on the large (first) slideshow
+    var showDots = (slideshowId === 'workSlideshow');
+    var DOT_MAX = 8; // max visible dots on the large slideshow
+    var dotCount = Math.min(slides.length, DOT_MAX);
+    var groupSize = Math.ceil(slides.length / dotCount);
 
-    // Hide dots if only 1 photo
-    if (slides.length <= 1) { dotsContainer.style.display = 'none'; }
+    dotsContainer.innerHTML = '';
+    if (showDots && slides.length > 1) {
+      for (var d = 0; d < dotCount; d++) {
+        (function(dotIdx) {
+          var dot = document.createElement('button');
+          dot.className = 'work-dot' + (dotIdx === 0 ? ' active' : '');
+          dot.setAttribute('aria-label', 'Slide group ' + (dotIdx + 1));
+          dot.addEventListener('click', function() {
+            goTo(dotIdx * groupSize);
+            resetTimer();
+          });
+          dotsContainer.appendChild(dot);
+        })(d);
+      }
+    } else {
+      dotsContainer.style.display = 'none';
+    }
+
+    function activeDot() {
+      return Math.min(Math.floor(current / groupSize), dotCount - 1);
+    }
 
     function goTo(index) {
       slides[current].classList.remove('active');
-      dotsContainer.children[current].classList.remove('active');
+      var prevDot = dotsContainer.children[activeDot()];
+      if (prevDot) prevDot.classList.remove('active');
       current = (index + slides.length) % slides.length;
       slides[current].classList.add('active');
-      dotsContainer.children[current].classList.add('active');
+      var nextDot = dotsContainer.children[activeDot()];
+      if (nextDot) nextDot.classList.add('active');
     }
 
     function next() { goTo(current + 1); }
@@ -2192,6 +2217,21 @@
       lightbox.addEventListener('click', function(e) {
         if (e.target === lightbox) closeLightbox();
       });
+
+      /* swipe left/right to navigate */
+      var lbTouchStartX = 0;
+      var lbTouchStartY = 0;
+      lightbox.addEventListener('touchstart', function(e) {
+        lbTouchStartX = e.touches[0].clientX;
+        lbTouchStartY = e.touches[0].clientY;
+      }, { passive: true });
+      lightbox.addEventListener('touchend', function(e) {
+        var dx = e.changedTouches[0].clientX - lbTouchStartX;
+        var dy = e.changedTouches[0].clientY - lbTouchStartY;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+          if (dx < 0) { lightboxNext(); } else { lightboxPrev(); }
+        }
+      }, { passive: true });
     }
 
     /* ── Gallery modal ── */
