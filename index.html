@@ -1277,6 +1277,43 @@
       .manufacturer-tag  { font-size: 0.55rem; letter-spacing: 0.1em; }
     }
 
+    /* ════════════════════════════════════════
+       SCROLL ANIMATIONS
+    ════════════════════════════════════════ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: opacity, transform;
+    }
+    .reveal.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* stagger children inside a revealed parent */
+    .reveal-stagger > * {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: opacity, transform;
+    }
+    .reveal-stagger.revealed > *:nth-child(1) { transition-delay: 0.05s; opacity: 1; transform: none; }
+    .reveal-stagger.revealed > *:nth-child(2) { transition-delay: 0.15s; opacity: 1; transform: none; }
+    .reveal-stagger.revealed > *:nth-child(3) { transition-delay: 0.25s; opacity: 1; transform: none; }
+    .reveal-stagger.revealed > *:nth-child(4) { transition-delay: 0.35s; opacity: 1; transform: none; }
+    .reveal-stagger.revealed > *:nth-child(5) { transition-delay: 0.45s; opacity: 1; transform: none; }
+    .reveal-stagger.revealed > *:nth-child(6) { transition-delay: 0.55s; opacity: 1; transform: none; }
+    /* respect reduced-motion preference */
+    @media (prefers-reduced-motion: reduce) {
+      .reveal, .reveal-stagger > * {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1355,7 +1392,7 @@
   ══════════════════════════════════════ -->
   <section class="section" id="about">
     <div class="container">
-      <div class="about-content">
+      <div class="about-content reveal">
           <p class="eyebrow">About Us</p>
           <span class="gold-line"></span>
           <h2 class="section-title" style="margin-bottom:2rem;">
@@ -1373,12 +1410,12 @@
   ══════════════════════════════════════ -->
   <section class="section section-alt" id="services">
     <div class="container">
-      <div class="section-header">
+      <div class="section-header reveal">
         <p class="eyebrow">What We Offer</p>
         <span class="gold-line"></span>
         <h2 class="section-title">Our <em>flooring</em></h2>
       </div>
-      <div class="cards-grid">
+      <div class="cards-grid reveal-stagger">
 
         <div class="card">
           <div class="card-icon-wrap">
@@ -1482,12 +1519,12 @@
   ══════════════════════════════════════ -->
   <section class="section" id="work">
     <div class="container">
-      <div class="section-header">
+      <div class="section-header reveal">
         <p class="eyebrow">Recent Projects</p>
         <span class="gold-line"></span>
         <h2 class="section-title">Our <em>work</em></h2>
       </div>
-      <div class="work-grid">
+      <div class="work-grid reveal">
         <div>
           <div class="work-slideshow" id="workSlideshow">
             <div class="work-dots" id="workDots"></div>
@@ -1542,7 +1579,7 @@
   <!-- ══════════════════════════════════════
        MANUFACTURER BANNER
   ══════════════════════════════════════ -->
-  <div class="manufacturer-strip">
+  <div class="manufacturer-strip reveal">
     <div class="container">
       <div class="manufacturer-eyebrow">
         <p class="eyebrow" style="text-transform:none;letter-spacing:0.18em;">We Install</p>
@@ -1646,7 +1683,7 @@
   ══════════════════════════════════════ -->
   <section class="testimonial-section" id="testimonials">
     <div class="container">
-      <div class="testimonial-inner">
+      <div class="testimonial-inner reveal">
         <div class="testimonial-carousel" id="testimonial-carousel">
 
           <div class="testimonial-slide active">
@@ -1684,7 +1721,7 @@
        CTA / CONTACT
   ══════════════════════════════════════ -->
   <section class="cta-section" id="contact">
-    <div class="container">
+    <div class="container reveal">
       <p class="eyebrow">Begin Your Project</p>
       <span class="gold-line"></span>
       <h2 class="section-title" style="margin-bottom:1.25rem;">
@@ -2292,6 +2329,23 @@
         showSlide(i);
         timer = setInterval(next, 10000);
       });
+    });
+  })();
+
+
+  /* ── Scroll reveal ── */
+  (function() {
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal, .reveal-stagger').forEach(function(el) {
+      observer.observe(el);
     });
   })();
 
