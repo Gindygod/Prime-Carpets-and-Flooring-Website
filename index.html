@@ -64,6 +64,16 @@
       height: 2px;
       background: var(--gold);
       margin-bottom: 1.5rem;
+      transform-origin: left center;
+      transform: scaleX(0);
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .gold-line.drawn {
+      transform: scaleX(1);
+    }
+    /* CTA gold line is centred so animate from centre */
+    .cta-section .gold-line {
+      transform-origin: center center;
     }
 
     .eyebrow {
@@ -703,6 +713,11 @@
       position: relative;
       overflow: hidden;
       cursor: pointer;
+      transition: background-size 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    /* zoom the background image on hover */
+    .gallery-thumb[style]:hover {
+      background-size: 108%;
     }
     .gallery-thumb:not([style]) {
       background: linear-gradient(135deg, var(--navy-light) 0%, var(--navy-mid) 100%);
@@ -712,9 +727,9 @@
       position: absolute;
       inset: 0;
       background: rgba(201,160,101,0);
-      transition: background 0.3s;
+      transition: background 0.4s;
     }
-    .gallery-thumb:hover::after { background: rgba(201,160,101,0.12); }
+    .gallery-thumb:hover::after { background: rgba(201,160,101,0.10); }
     .gallery-empty {
       grid-column: 1/-1;
       text-align: center;
@@ -2296,6 +2311,27 @@
   })();
 
 
+
+  /* ── Gold line draw animation ── */
+  (function() {
+    if (!window.IntersectionObserver) {
+      document.querySelectorAll('.gold-line').forEach(function(el) {
+        el.classList.add('drawn');
+      });
+      return;
+    }
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('drawn');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.gold-line').forEach(function(el) {
+      observer.observe(el);
+    });
+  })();
 
   </script>
 
