@@ -263,17 +263,22 @@
     .hero-bg {
       position: absolute;
       inset: 0;
-      background:
-        linear-gradient(to right, rgba(30,31,48,0.82) 0%, rgba(30,31,48,0.45) 55%, rgba(30,31,48,0.2) 100%),
-        url('hero-bg.jpg') center center / cover no-repeat;
-      background-attachment: fixed, fixed;
-      will-change: background-position;
+      overflow: hidden;
     }
-    @media (max-width: 768px) {
-      /* background-attachment:fixed doesn't work on iOS — use JS parallax instead */
-      .hero-bg {
-        background-attachment: scroll, scroll;
-      }
+    .hero-bg-img {
+      position: absolute;
+      top: -20%;
+      left: 0;
+      width: 100%;
+      height: 140%;
+      object-fit: cover;
+      object-position: center;
+      will-change: transform;
+    }
+    .hero-bg-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, rgba(30,31,48,0.82) 0%, rgba(30,31,48,0.45) 55%, rgba(30,31,48,0.2) 100%);
     }
 
     .hero-bg::before,
@@ -1336,7 +1341,10 @@
        HERO
   ══════════════════════════════════════ -->
   <section class="hero">
-    <div class="hero-bg"></div>
+    <div class="hero-bg">
+      <img class="hero-bg-img" id="heroBgImg" src="hero-bg.jpg" alt="" aria-hidden="true" />
+      <div class="hero-bg-overlay"></div>
+    </div>
     <div class="container hero-content">
       <p class="eyebrow">Flooring Specialists</p>
       <h1 class="hero-title">
@@ -2330,14 +2338,13 @@
 
 
 
-  /* ── Hero parallax (mobile — iOS ignores background-attachment:fixed) ── */
+  /* ── Hero parallax ── */
   (function() {
-    if (window.innerWidth > 768) return; // desktop handled by CSS
-    var heroBg = document.querySelector('.hero-bg');
-    if (!heroBg) return;
+    var img = document.getElementById('heroBgImg');
+    if (!img) return;
     function onScroll() {
       var scrollY = window.pageYOffset;
-      heroBg.style.backgroundPositionY = 'calc(center + ' + (scrollY * 0.4) + 'px), calc(center + ' + (scrollY * 0.4) + 'px)';
+      img.style.transform = 'translateY(' + (scrollY * 0.35) + 'px)';
     }
     window.addEventListener('scroll', onScroll, { passive: true });
   })();
