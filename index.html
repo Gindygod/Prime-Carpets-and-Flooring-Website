@@ -66,7 +66,7 @@
       margin-bottom: 1.5rem;
       transform-origin: left center;
       transform: scaleX(0);
-      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .gold-line.drawn {
       transform: scaleX(1);
@@ -713,11 +713,13 @@
       position: relative;
       overflow: hidden;
       cursor: pointer;
-      transition: background-size 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: background-size 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+                  filter 0.55s cubic-bezier(0.22, 1, 0.36, 1);
     }
     /* zoom the background image on hover */
     .gallery-thumb[style]:hover {
-      background-size: 108%;
+      background-size: 118%;
+      filter: brightness(1.12);
     }
     .gallery-thumb:not([style]) {
       background: linear-gradient(135deg, var(--navy-light) 0%, var(--navy-mid) 100%);
@@ -2327,7 +2329,7 @@
           observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.5 });
+    }, { threshold: 1.0, rootMargin: '0px 0px -80px 0px' });
     document.querySelectorAll('.gold-line').forEach(function(el) {
       observer.observe(el);
     });
