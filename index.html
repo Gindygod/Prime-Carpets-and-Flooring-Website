@@ -266,6 +266,14 @@
       background:
         linear-gradient(to right, rgba(30,31,48,0.82) 0%, rgba(30,31,48,0.45) 55%, rgba(30,31,48,0.2) 100%),
         url('hero-bg.jpg') center center / cover no-repeat;
+      background-attachment: fixed, fixed;
+      will-change: background-position;
+    }
+    @media (max-width: 768px) {
+      /* background-attachment:fixed doesn't work on iOS — use JS parallax instead */
+      .hero-bg {
+        background-attachment: scroll, scroll;
+      }
     }
 
     .hero-bg::before,
@@ -2322,6 +2330,18 @@
 
 
 
+  /* ── Hero parallax (mobile — iOS ignores background-attachment:fixed) ── */
+  (function() {
+    if (window.innerWidth > 768) return; // desktop handled by CSS
+    var heroBg = document.querySelector('.hero-bg');
+    if (!heroBg) return;
+    function onScroll() {
+      var scrollY = window.pageYOffset;
+      heroBg.style.backgroundPositionY = 'calc(center + ' + (scrollY * 0.4) + 'px), calc(center + ' + (scrollY * 0.4) + 'px)';
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+  })();
+
   /* ── Gold line draw animation ── */
   (function() {
     if (!window.IntersectionObserver) {
@@ -2399,4 +2419,3 @@
 
 </body>
 </html>
- 
