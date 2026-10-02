@@ -707,22 +707,25 @@
     }
     .gallery-thumb {
       aspect-ratio: 4/3;
-      background: var(--navy-light);
-      background-size: cover;
-      background-position: center;
+      background: linear-gradient(135deg, var(--navy-light) 0%, var(--navy-mid) 100%);
       position: relative;
       overflow: hidden;
       cursor: pointer;
-      transition: background-size 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    }
+    .gallery-thumb-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
                   filter 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
     }
-    /* zoom the background image on hover */
-    .gallery-thumb[style]:hover {
-      background-size: 118%;
+    .gallery-thumb:hover .gallery-thumb-img {
+      transform: scale(1.12);
       filter: brightness(1.12);
-    }
-    .gallery-thumb:not([style]) {
-      background: linear-gradient(135deg, var(--navy-light) 0%, var(--navy-mid) 100%);
     }
     .gallery-thumb::after {
       content: '';
@@ -730,6 +733,7 @@
       inset: 0;
       background: rgba(201,160,101,0);
       transition: background 0.4s;
+      z-index: 1;
     }
     .gallery-thumb:hover::after { background: rgba(201,160,101,0.10); }
     .gallery-empty {
@@ -2181,8 +2185,12 @@
       PHOTO_POOL.forEach(function(photo, idx) {
         var thumb = document.createElement('div');
         thumb.className = 'gallery-thumb';
-        thumb.style.backgroundImage = 'url("' + photo + '")';
         thumb.setAttribute('data-index', idx);
+        var img = document.createElement('img');
+        img.src = photo;
+        img.alt = 'Flooring project ' + (idx + 1);
+        img.className = 'gallery-thumb-img';
+        thumb.appendChild(img);
         thumb.addEventListener('click', function() {
           openLightbox(idx);
         });
