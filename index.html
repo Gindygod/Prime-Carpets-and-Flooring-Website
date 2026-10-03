@@ -772,7 +772,7 @@
       background: rgba(0,0,0,0);
       align-items: center;
       justify-content: center;
-      transition: background 0.4s ease;
+      transition: background 0.25s ease;
     }
     .photo-lightbox.open {
       display: flex;
@@ -792,14 +792,14 @@
                   opacity 0.3s ease;
     }
     .photo-lightbox-img.lb-zoom-in {
-      animation: lbZoomIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation: lbZoomIn 0.32s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
     }
     @keyframes lbZoomIn {
-      from { transform: var(--lb-start-transform); opacity: 0.6; }
+      from { transform: var(--lb-start-transform); opacity: 0.7; }
       to   { transform: scale(1) translate(0, 0); opacity: 1; }
     }
     .photo-lightbox-img.lb-zoom-out {
-      animation: lbZoomOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+      animation: lbZoomOut 0.22s cubic-bezier(0.4, 0, 1, 1) forwards;
     }
     @keyframes lbZoomOut {
       from { transform: scale(1) translate(0, 0); opacity: 1; }
@@ -2272,15 +2272,14 @@
         lbImg.style.setProperty('--lb-start-transform', startTransform);
       }
 
-      // Fade in backdrop, then zoom image
-      requestAnimationFrame(function() {
-        lightbox.classList.add('lb-ready');
-        lbImg.classList.remove('lb-zoom-out');
-        lbImg.classList.add('lb-zoom-in');
-        lbImg.addEventListener('animationend', function h() {
-          lbImg.classList.remove('lb-zoom-in');
-          lbImg.removeEventListener('animationend', h);
-        });
+      // Start animation immediately — don't wait for image load
+      lightbox.classList.add('lb-ready');
+      lbImg.classList.remove('lb-zoom-out');
+      void lbImg.offsetWidth; // force reflow so animation restarts cleanly
+      lbImg.classList.add('lb-zoom-in');
+      lbImg.addEventListener('animationend', function h() {
+        lbImg.classList.remove('lb-zoom-in');
+        lbImg.removeEventListener('animationend', h);
       });
     }
 
