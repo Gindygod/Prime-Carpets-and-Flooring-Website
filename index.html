@@ -769,11 +769,17 @@
       position: fixed;
       inset: 0;
       z-index: 9100;
-      background: rgba(0,0,0,0.93);
+      background: rgba(0,0,0,0);
       align-items: center;
       justify-content: center;
+      transition: background 0.4s ease;
     }
-    .photo-lightbox.open { display: flex; }
+    .photo-lightbox.open {
+      display: flex;
+    }
+    .photo-lightbox.open.lb-ready {
+      background: rgba(0,0,0,0.93);
+    }
     .photo-lightbox-img {
       max-width: 90vw;
       max-height: 88vh;
@@ -781,6 +787,23 @@
       border-radius: 2px;
       display: block;
       user-select: none;
+      transform-origin: center center;
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 0.3s ease;
+    }
+    .photo-lightbox-img.lb-zoom-in {
+      animation: lbZoomIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    @keyframes lbZoomIn {
+      from { transform: var(--lb-start-transform); opacity: 0.6; }
+      to   { transform: scale(1) translate(0, 0); opacity: 1; }
+    }
+    .photo-lightbox-img.lb-zoom-out {
+      animation: lbZoomOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+    }
+    @keyframes lbZoomOut {
+      from { transform: scale(1) translate(0, 0); opacity: 1; }
+      to   { transform: var(--lb-start-transform); opacity: 0; }
     }
     .photo-lightbox-close {
       position: absolute;
@@ -2208,7 +2231,7 @@
         img.className = 'gallery-thumb-img';
         thumb.appendChild(img);
         thumb.addEventListener('click', function() {
-          openLightbox(idx);
+          openLightbox(idx, thumb);
         });
         grid.appendChild(thumb);
       });
@@ -2223,16 +2246,53 @@
     var lbNext       = document.getElementById('lightboxNext');
     var lbIndex      = 0;
 
-    function openLightbox(idx) {
+    function openLightbox(idx, thumbEl) {
       lbIndex = idx;
       showLightboxPhoto();
       lightbox.classList.add('open');
       document.body.style.overflow = 'hidden';
+
+      // Calculate where the thumb sits on screen vs where the lightbox img will be
+      if (thumbEl) {
+        var thumbRect = thumbEl.getBoundingClientRect();
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        // Centre of thumb relative to viewport centre
+        var thumbCX = thumbRect.left + thumbRect.width / 2;
+        var thumbCY = thumbRect.top  + thumbRect.height / 2;
+        var vpCX = vw / 2;
+        var vpCY = vh / 2;
+        // Scale: thumb size vs expected lightbox image size
+        var scaleX = thumbRect.width  / (vw * 0.9);
+        var scaleY = thumbRect.height / (vh * 0.88);
+        var scale  = Math.min(scaleX, scaleY);
+        var tx = thumbCX - vpCX;
+        var ty = thumbCY - vpCY;
+        var startTransform = 'scale(' + scale + ') translate(' + (tx / scale) + 'px, ' + (ty / scale) + 'px)';
+        lbImg.style.setProperty('--lb-start-transform', startTransform);
+      }
+
+      // Fade in backdrop, then zoom image
+      requestAnimationFrame(function() {
+        lightbox.classList.add('lb-ready');
+        lbImg.classList.remove('lb-zoom-out');
+        lbImg.classList.add('lb-zoom-in');
+        lbImg.addEventListener('animationend', function h() {
+          lbImg.classList.remove('lb-zoom-in');
+          lbImg.removeEventListener('animationend', h);
+        });
+      });
     }
 
     function closeLightbox() {
-      lightbox.classList.remove('open');
-      document.body.style.overflow = modal.classList.contains('open') ? 'hidden' : '';
+      lbImg.classList.add('lb-zoom-out');
+      lightbox.classList.remove('lb-ready');
+      lbImg.addEventListener('animationend', function h() {
+        lightbox.classList.remove('open');
+        lbImg.classList.remove('lb-zoom-out');
+        lbImg.removeEventListener('animationend', h);
+        document.body.style.overflow = modal.classList.contains('open') ? 'hidden' : '';
+      });
     }
 
     function showLightboxPhoto() {
