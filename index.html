@@ -363,7 +363,7 @@
     ════════════════════════════════════════ */
     .section {
       padding: 4rem 0;
-      scroll-margin-top: 92px;
+      scroll-margin-top: 0px;
     }
 
     .section-alt {
@@ -862,7 +862,7 @@
       position: relative;
       overflow: hidden;
       background: var(--navy-mid);
-      scroll-margin-top: 92px;
+      scroll-margin-top: 0px;
     }
     .cta-section::before {
       content: '';
@@ -1896,7 +1896,7 @@
         if (!target) return;
         e.preventDefault();
         const navH = nav.getBoundingClientRect().height;
-        const offset = 24;
+        const offset = -40;
         const top = target.getBoundingClientRect().top + window.scrollY - navH - offset;
         window.scrollTo({ top, behavior: 'smooth' });
       });
